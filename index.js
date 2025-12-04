@@ -31,6 +31,264 @@ let dir = 1;
 let dragging = false;
 let selectedFile = null;
 
+// =================== NAVBAR FUNCTIONALITY ===================
+
+// Create missing sections for navbar links
+function createMissingSections() {
+    const container = document.querySelector('.container');
+    
+    // How It Works Section
+    if (!document.getElementById('how-it-works')) {
+        const howItWorksSection = document.createElement('section');
+        howItWorksSection.id = 'how-it-works';
+        howItWorksSection.className = 'features-section';
+        howItWorksSection.innerHTML = `
+            <h2 class="section-title">How It Works</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <i class="fas fa-upload"></i>
+                    <h3>1. Upload Your Image</h3>
+                    <p>Drag & drop or select an image from your device. We support JPG, PNG, and WEBP formats up to 10MB.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-cogs"></i>
+                    <h3>2. AI Processing</h3>
+                    <p>Our AI analyzes your image and enhances it using advanced neural networks to upscale up to 4x.</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-download"></i>
+                    <h3>3. Download Result</h3>
+                    <p>Download your enhanced image with improved resolution, clarity, and detail.</p>
+                </div>
+            </div>
+        `;
+        // Insert after comparison section
+        const comparisonSection = document.getElementById('comparison');
+        container.insertBefore(howItWorksSection, comparisonSection.nextSibling);
+    }
+    
+    // Pricing Section
+    if (!document.getElementById('pricing')) {
+        const pricingSection = document.createElement('section');
+        pricingSection.id = 'pricing';
+        pricingSection.className = 'features-section';
+        pricingSection.innerHTML = `
+            <h2 class="section-title">Pricing Plans</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <h3>Free Plan</h3>
+                    <div style="font-size: 2rem; color: var(--accent); margin: 20px 0;">$0</div>
+                    <ul style="text-align: left; padding-left: 20px; color: var(--text-secondary);">
+                        <li>Up to 5 images per day</li>
+                        <li>2x upscaling</li>
+                        <li>Basic enhancement</li>
+                        <li>Watermark on results</li>
+                    </ul>
+                    <button class="btn btn-outline" style="margin-top: 20px; width: 100%;">Select Free</button>
+                </div>
+                <div class="feature-card" style="border-color: var(--accent); transform: scale(1.05);">
+                    <h3>Pro Plan</h3>
+                    <div style="font-size: 2rem; color: var(--accent); margin: 20px 0;">$9.99/month</div>
+                    <ul style="text-align: left; padding-left: 20px; color: var(--text-secondary);">
+                        <li>Unlimited images</li>
+                        <li>4x upscaling</li>
+                        <li>Advanced AI enhancement</li>
+                        <li>No watermark</li>
+                        <li>Priority processing</li>
+                    </ul>
+                    <button class="btn btn-primary" style="margin-top: 20px; width: 100%;">Get Started</button>
+                </div>
+                <div class="feature-card">
+                    <h3>Student Plan</h3>
+                    <div style="font-size: 2rem; color: var(--accent); margin: 20px 0;">$4.99/month</div>
+                    <ul style="text-align: left; padding-left: 20px; color: var(--text-secondary);">
+                        <li>Up to 20 images per day</li>
+                        <li>4x upscaling</li>
+                        <li>Advanced enhancement</li>
+                        <li>No watermark</li>
+                        <li>Student verification required</li>
+                    </ul>
+                    <button class="btn btn-outline" style="margin-top: 20px; width: 100%;">Select Student</button>
+                </div>
+            </div>
+        `;
+        // Insert before footer
+        const footer = document.querySelector('footer');
+        container.insertBefore(pricingSection, footer);
+    }
+    
+    // Examples Section
+    if (!document.getElementById('examples')) {
+        const examplesSection = document.createElement('section');
+        examplesSection.id = 'examples';
+        examplesSection.className = 'features-section';
+        examplesSection.innerHTML = `
+            <h2 class="section-title">Example Results</h2>
+            <div style="text-align: center; margin-bottom: 40px;">
+                <p style="color: var(--text-secondary); max-width: 800px; margin: 0 auto 30px;">
+                    See how our AI upscaler transforms different types of images
+                </p>
+            </div>
+            <div class="features">
+                <div class="feature-card">
+                    <h3>Portrait Enhancement</h3>
+                    <p style="color: var(--text-secondary);">Facial details become sharper while maintaining natural skin texture.</p>
+                    <div style="height: 200px; background: var(--secondary); border-radius: 8px; margin-top: 15px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                        <i class="fas fa-user" style="font-size: 3rem;"></i>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3>Landscape Photos</h3>
+                    <p style="color: var(--text-secondary);">Nature scenes gain incredible detail in trees, mountains, and water.</p>
+                    <div style="height: 200px; background: var(--secondary); border-radius: 8px; margin-top: 15px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                        <i class="fas fa-mountain" style="font-size: 3rem;"></i>
+                    </div>
+                </div>
+                <div class="feature-card">
+                    <h3>Digital Art</h3>
+                    <p style="color: var(--text-secondary);">Artwork is upscaled without losing artistic style or introducing artifacts.</p>
+                    <div style="height: 200px; background: var(--secondary); border-radius: 8px; margin-top: 15px; display: flex; align-items: center; justify-content: center; color: var(--text-secondary);">
+                        <i class="fas fa-palette" style="font-size: 3rem;"></i>
+                    </div>
+                </div>
+            </div>
+        `;
+        // Insert before pricing section if exists, otherwise before footer
+        const pricingSection = document.getElementById('pricing');
+        const footer = document.querySelector('footer');
+        if (pricingSection) {
+            container.insertBefore(examplesSection, pricingSection);
+        } else {
+            container.insertBefore(examplesSection, footer);
+        }
+    }
+    
+    // About Section
+    if (!document.getElementById('about')) {
+        const aboutSection = document.createElement('section');
+        aboutSection.id = 'about';
+        aboutSection.className = 'upload-section';
+        aboutSection.style.marginTop = '40px';
+        aboutSection.innerHTML = `
+            <h2><i class="fas fa-info-circle"></i> About This Project</h2>
+            <div style="line-height: 1.8; color: var(--text-secondary);">
+                <p>This AI Image Upscaler is a university project developed for the Computer Science department.</p>
+                <p><strong>Technologies Used:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li>Frontend: HTML5, CSS3, JavaScript (ES6+)</li>
+                    <li>Backend: Node.js with Express</li>
+                    <li>API Integration: FreePic Image Enhancer API</li>
+                    <li>Deployment: Vercel Platform</li>
+                </ul>
+                <p><strong>Project Goals:</strong></p>
+                <ul style="margin-left: 20px; margin-bottom: 20px;">
+                    <li>Demonstrate AI integration in web applications</li>
+                    <li>Implement responsive web design principles</li>
+                    <li>Create a user-friendly image processing interface</li>
+                    <li>Showcase modern web development practices</li>
+                </ul>
+                <p>This project serves as a demonstration of how AI can be integrated into practical web applications to solve real-world problems like image quality enhancement.</p>
+            </div>
+        `;
+        // Insert before footer
+        const footer = document.querySelector('footer');
+        container.insertBefore(aboutSection, footer);
+    }
+}
+
+// Function to scroll to section smoothly
+function scrollToSection(sectionId) {
+    const section = document.getElementById(sectionId);
+    if (section) {
+        // Update active nav link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${sectionId}`) {
+                link.classList.add('active');
+            }
+        });
+        
+        // Smooth scroll
+        section.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+// Initialize navbar functionality
+function initNavbar() {
+    console.log('Initializing navbar functionality...');
+    
+    // Create missing sections first
+    createMissingSections();
+    
+    // Get all navbar links
+    const navLinks = document.querySelectorAll('.nav-links a');
+    
+    // Add click events to navbar links
+    navLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('href').substring(1);
+            scrollToSection(targetId);
+        });
+    });
+    
+    // Add smooth scrolling for all anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const href = this.getAttribute('href');
+            if (href !== '#') {
+                e.preventDefault();
+                const targetId = href.substring(1);
+                if (targetId) {
+                    const targetElement = document.getElementById(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }
+        });
+    });
+    
+    // Make footer links work
+    document.querySelectorAll('.footer-links a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const linkText = link.textContent.toLowerCase();
+            
+            if (linkText.includes('home')) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                document.querySelectorAll('.nav-links a').forEach(navLink => {
+                    navLink.classList.remove('active');
+                    if (navLink.textContent.toLowerCase().includes('home')) {
+                        navLink.classList.add('active');
+                    }
+                });
+            } else if (linkText.includes('how it works')) {
+                scrollToSection('how-it-works');
+            } else if (linkText.includes('api')) {
+                alert('API documentation would open in a new tab in a real implementation.');
+            } else if (linkText.includes('privacy')) {
+                alert('Privacy policy page would open in a real implementation.');
+            }
+        });
+    });
+    
+    // Make pricing buttons work
+    document.addEventListener('click', (e) => {
+        if (e.target.classList.contains('btn') && 
+            (e.target.textContent.includes('Select') || e.target.textContent.includes('Get Started'))) {
+            e.preventDefault();
+            const plan = e.target.closest('.feature-card').querySelector('h3').textContent;
+            showNotification(`Selected ${plan} plan! In a real implementation, this would proceed to checkout.`, 'success');
+        }
+    });
+}
+
+// =================== MAIN APPLICATION FUNCTIONALITY ===================
+
 // Initialize the application
 function init() {
     console.log('AI Image Upscaler initialized');
@@ -47,6 +305,9 @@ function init() {
     
     // Set up event listeners
     setupEventListeners();
+    
+    // Initialize navbar functionality
+    initNavbar();
 }
 
 // Apply position to slider
@@ -155,10 +416,7 @@ function setupEventListeners() {
     // Start upscaling button
     if (startUpscalingBtn) {
         startUpscalingBtn.addEventListener('click', () => {
-            const uploadSection = document.querySelector('.upload-section');
-            if (uploadSection) {
-                uploadSection.scrollIntoView({ behavior: 'smooth' });
-            }
+            scrollToSection('upload');
         });
     }
 
@@ -470,7 +728,7 @@ function handleLoginSubmit(e) {
     
     // In a real implementation, this would validate with a backend
     console.log('Login attempt:', email, password);
-    showNotification('Login functionality would be connected to a backend in a real implementation.', 'info');
+    showNotification('Login successful! (Demo mode)', 'success');
     
     // Close modal
     if (loginModal) loginModal.classList.remove('active');
@@ -502,11 +760,17 @@ function handleRegisterSubmit(e) {
     
     // In a real implementation, this would send data to a backend
     console.log('Registration attempt:', name, email);
-    showNotification('Registration functionality would be connected to a backend in a real implementation.', 'info');
+    showNotification('Registration successful! Welcome to AI Upscaler. (Demo mode)', 'success');
     
     // Close modal
     if (registerModal) registerModal.classList.remove('active');
 }
 
-// Initialize the app
-init();
+// =================== INITIALIZE THE APP ===================
+
+// Initialize the app when DOM is loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
