@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Image Upscaler | University Project</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #07101a;
+      --secondary: #0b1622;
+      --accent: #00c2ff;
+      --accent-dark: #0099cc;
+      --text-primary: #e6f4ff;
+      --text-secondary: #9fcff6;
+      --border: rgba(255,255,255,0.04);
+      --success: #00d68f;
+      --card-bg: rgba(11, 22, 34, 0.7);
+    }
+
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: var(--primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background: rgba(7, 16, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+      padding: 5px 0;
+      position: relative;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--accent);
+    }
+
+    .nav-links a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-outline:hover {
+      background: rgba(0, 194, 255, 0.1);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 194, 255, 0.2);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 5%;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      margin-bottom: 60px;
+      padding-top: 30px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      background: linear-gradient(90deg, #00c2ff, #7a5fff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    /* Upload Section */
+    .upload-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 60px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .upload-section h2 {
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 60px 20px;
+      text-align: center;
+      transition: all 0.3s;
+      margin-bottom: 30px;
+      cursor: pointer;
+      background: rgba(0, 194, 255, 0.02);
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(0, 194, 255, 0.05);
+    }
+
+    .upload-area i {
+      font-size: 3.5rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .upload-area h3 {
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+
+    .upload-area p {
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .upload-btn {
+      display: inline-block;
+      padding: 12px 30px;
+      background: var(--accent);
+      color: var(--primary);
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .upload-btn:hover {
+      background: var(--accent-dark);
+      transform: translateY(-2px);
+    }
+
+    .file-info {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .file-info.show {
+      display: block;
+    }
+
+    .process-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.1rem;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .process-btn.show {
+      display: block;
+    }
+
+    /* Comparison Section */
+    .comparison-section {
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--accent);
+      font-size: 2rem;
+    }
+
+    .comparison-box {
+      width: 100%;
+      max-width: 900px;
+      height: 500px;
+      margin: 0 auto 30px;
+      position: relative;
+      background: var(--secondary);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .comparison-box img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-drag: none;
+      user-select: none;
+    }
+
+    .low-img {
+      z-index: 1;
+      filter: contrast(0.95) saturate(0.9);
+    }
+
+    .high-img {
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .slider-bar {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
+      z-index: 6;
+      transform: translateX(-50%);
+      cursor: ew-resize;
+    }
+
+    .slider-bar::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      box-shadow: 0 0 18px rgba(0,194,255,0.18);
+      z-index: -1;
+    }
+
+    .hint {
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 12px;
+      font-style: italic;
+    }
+
+    /* Features Section */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 30px;
+      border: 1px solid var(--border);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 194, 255, 0.1);
+      border-color: var(--accent);
+    }
+
+    .feature-card i {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Modal Styles (for login/register) */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--secondary);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 450px;
+      padding: 40px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-modal:hover {
+      color: var(--accent);
+    }
+
+    .modal h2 {
+      color: var(--accent);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .modal p {
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: border 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-secondary);
+    }
+
+    .form-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(7, 16, 26, 0.9);
+      border-top: 1px solid var(--border);
+      padding: 40px 5% 20px;
+      margin-top: 60px;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+
+    .footer-logo {
+      color: var(--accent);
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .footer-description {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .footer-links h3 {
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+    }
+
+    .footer-links ul {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .copyright {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      .comparison-box {
+        height: 400px;
+      }
+      
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        height: auto;
+        padding: 15px 5%;
+      }
+      
+      .logo {
+        margin-bottom: 15px;
+      }
+      
+      .nav-links {
+        margin-bottom: 15px;
+        gap: 20px;
+      }
+      
+      .auth-buttons {
+        margin-top: 10px;
+      }
+      
+      .comparison-box {
+        height: 350px;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+      }
+      
+      .upload-section {
+        padding: 30px 20px;
+      }
+      
+      .upload-area {
+        padding: 40px 15px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .comparison-box {
+        height: 280px;
+      }
+      
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+      
+      .modal-content {
+        padding: 30px 20px;
+      }
+      
+      .features {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-magic"></i>
+      <span>AI Upscaler</span>
+    </div>
+    
+<ul class="nav-links">
+  <li><a href="#home" class="active">Home</a></li>
+  <li><a href="#how-it-works">How It Works</a></li>
+  <li><a href="#pricing">Pricing</a></li>
+  <li><a href="#examples">Examples</a></li>
+  <li><a href="#about">About</a></li>
+</ul>
+    
+    <div class="auth-buttons">
+      <button class="btn btn-outline" id="loginBtn">Login</button>
+      <button class="btn btn-primary" id="registerBtn">Register</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+      <h1>AI-Powered Image Upscaler</h1>
+      <p>Enhance your images with cutting-edge AI technology. Upscale images up to 4x without losing quality. Perfect for photographers, designers, and content creators.</p>
+      <button class="btn btn-primary" id="startUpscaling">
+        <i class="fas fa-upload"></i> Start Upscaling Now
+      </button>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="upload-section" id="upload">
+      <h2><i class="fas fa-cloud-upload-alt"></i> Upload Your Image</h2>
+      
+      <div class="upload-area" id="uploadArea">
+        <i class="fas fa-file-image"></i>
+        <h3>Drag & Drop Your Image</h3>
+        <p>Supports JPG, PNG, WEBP up to 10MB</p>
+        <label for="fileInput" class="upload-btn">Browse Files</label>
+        <input type="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.webp">
+      </div>
+      
+      <div class="file-info" id="fileInfo">
+        <p><strong>Selected File:</strong> <span id="fileName">example.jpg</span></p>
+        <p><strong>Size:</strong> <span id="fileSize">2.4 MB</span></p>
+        <p><strong>Dimensions:</strong> <span id="fileDimensions">1280 x 720</span></p>
+      </div>
+      
+      <button class="btn btn-primary process-btn" id="processBtn">Upscale Image with AI</button>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="comparison-section" id="comparison">
+      <h2 class="section-title">Before & After Comparison</h2>
+      
+      <div class="comparison-box" id="comp">
+        <img src="ex.jpg" alt="Original Image" class="low-img">
+        <img src="ex2.jpg" alt="Upscaled Image" class="high-img" id="highImg">
+        <div class="slider-bar" id="bar"></div>
+      </div>
+      
+      <div class="hint">Drag the vertical line to compare the original image with the AI-upscaled version</div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+      <h2 class="section-title">Why Choose Our AI Upscaler</h2>
+      
+      <div class="features">
+        <div class="feature-card">
+          <i class="fas fa-rocket"></i>
+          <h3>Fast Processing</h3>
+          <p>Upscale images in seconds using our powerful AI algorithms running on high-performance servers.</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-chart-line"></i>
+          <h3>4x Resolution</h3>
+          <p>Increase image resolution up to 4 times while preserving quality and details.</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-brain"></i>
+          <h3>Smart AI</h3>
+          <p>Our AI intelligently analyzes images to enhance details, reduce noise, and improve clarity.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">AI Upscaler</div>
+        <p class="footer-description">A university project showcasing AI-powered image enhancement using the FreePic Image Enhancer API.</p>
+      </div>
+      
+      <div class="footer-col">
+        <div class="footer-links">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">How It Works</a></li>
+            <li><a href="#">API Documentation</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <div class="footer-links">
+          <h3>Contact</h3>
+          <ul>
+            <li><i class="fas fa-envelope"></i> contact@aiupscaler.edu</li>
+            <li><i class="fas fa-university"></i> University Computer Science Department</li>
+            <li><i class="fas fa-map-marker-alt"></i> 123 University Ave, Tech City</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      &copy; 2023 AI Image Upscaler - University Project. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div class="modal" id="loginModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeLogin">&times;</button>
+      <h2>Login to Your Account</h2>
+      <p>Access your upscaled images and history</p>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" class="form-control" 
+          holder="you@example.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary form-submit">Login</button>
+        
+        <div class="form-footer">
+          Don't have an account? <a href="#" id="switchToRegister">Register here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div class="modal" id="registerModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeRegister">&times;</button>
+      <h2>Create an Account</h2>
+      <p>Join to save and manage your upscaled images</p>
+      
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="registerName">Full Name</label>
+          <input type="text" id="registerName" class="form-control" placeholder="John Doe" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="registerEmail">Email Address</label>
+          <input type="email" id="registerEmail" class="form-control" placeholder="you@example.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="registerPassword">Password</label>
+          <input type="password" id="registerPassword" class="form-control" placeholder="Create a strong password" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="registerConfirmPassword">Confirm Password</label>
+          <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Confirm your password" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary form-submit">Create Account</button>
+        
+        <div class="form-footer">
+          Already have an account? <a href="#" id="switchToLogin">Login here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="index.js"></script>
+
+
+</body>
+</html>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Image Upscaler | University Project</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #07101a;
+      --secondary: #0b1622;
+      --accent: #00c2ff;
+      --accent-dark: #0099cc;
+      --text-primary: #e6f4ff;
+      --text-secondary: #9fcff6;
+      --border: rgba(255,255,255,0.04);
+      --success: #00d68f;
+      --card-bg: rgba(11, 22, 34, 0.7);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      background: var(--primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Navbar Styles */
+    .navbar {
+      background: rgba(7, 16, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 5%;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .logo i {
+      font-size: 1.8rem;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+      padding: 5px 0;
+      position: relative;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      color: var(--accent);
+    }
+
+    .nav-links a.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.95rem;
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .btn-outline:hover {
+      background: rgba(0, 194, 255, 0.1);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 194, 255, 0.2);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 5%;
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      margin-bottom: 60px;
+      padding-top: 30px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      background: linear-gradient(90deg, #00c2ff, #7a5fff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 30px;
+      line-height: 1.6;
+    }
+
+    /* Upload Section */
+    .upload-section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 60px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .upload-section h2 {
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 60px 20px;
+      text-align: center;
+      transition: all 0.3s;
+      margin-bottom: 30px;
+      cursor: pointer;
+      background: rgba(0, 194, 255, 0.02);
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(0, 194, 255, 0.05);
+    }
+
+    .upload-area i {
+      font-size: 3.5rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .upload-area h3 {
+      margin-bottom: 10px;
+      font-size: 1.5rem;
+    }
+
+    .upload-area p {
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .upload-btn {
+      display: inline-block;
+      padding: 12px 30px;
+      background: var(--accent);
+      color: var(--primary);
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .upload-btn:hover {
+      background: var(--accent-dark);
+      transform: translateY(-2px);
+    }
+
+    .file-info {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+    }
+
+    .file-info.show {
+      display: block;
+    }
+
+    .process-btn {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.1rem;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .process-btn.show {
+      display: block;
+    }
+
+    /* Comparison Section */
+    .comparison-section {
+      margin-bottom: 60px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--accent);
+      font-size: 2rem;
+    }
+
+    .comparison-box {
+      width: 100%;
+      max-width: 900px;
+      height: 500px;
+      margin: 0 auto 30px;
+      position: relative;
+      background: var(--secondary);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .comparison-box img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-drag: none;
+      user-select: none;
+    }
+
+    .low-img {
+      z-index: 1;
+      filter: contrast(0.95) saturate(0.9);
+    }
+
+    .high-img {
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .slider-bar {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 3px;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.75));
+      z-index: 6;
+      transform: translateX(-50%);
+      cursor: ew-resize;
+    }
+
+    .slider-bar::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      box-shadow: 0 0 18px rgba(0,194,255,0.18);
+      z-index: -1;
+    }
+
+    .hint {
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 12px;
+      font-style: italic;
+    }
+
+    /* Features Section */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 30px;
+      border: 1px solid var(--border);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 194, 255, 0.1);
+      border-color: var(--accent);
+    }
+
+    .feature-card i {
+      font-size: 2.5rem;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      margin-bottom: 15px;
+      color: var(--text-primary);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Modal Styles (for login/register) */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--secondary);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 450px;
+      padding: 40px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      position: relative;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .close-modal:hover {
+      color: var(--accent);
+    }
+
+    .modal h2 {
+      color: var(--accent);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .modal p {
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      transition: border 0.3s;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-submit {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+    }
+
+    .form-footer {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-secondary);
+    }
+
+    .form-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    footer {
+      background: rgba(7, 16, 26, 0.9);
+      border-top: 1px solid var(--border);
+      padding: 40px 5% 20px;
+      margin-top: 60px;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      margin-bottom: 30px;
+    }
+
+    .footer-logo {
+      color: var(--accent);
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .footer-description {
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .footer-links h3 {
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+    }
+
+    .footer-links ul {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+    }
+
+    .copyright {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 992px) {
+      .comparison-box {
+        height: 400px;
+      }
+      
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        height: auto;
+        padding: 15px 5%;
+      }
+      
+      .logo {
+        margin-bottom: 15px;
+      }
+      
+      .nav-links {
+        margin-bottom: 15px;
+        gap: 20px;
+      }
+      
+      .auth-buttons {
+        margin-top: 10px;
+      }
+      
+      .comparison-box {
+        height: 350px;
+      }
+      
+      .hero h1 {
+        font-size: 2rem;
+      }
+      
+      .upload-section {
+        padding: 30px 20px;
+      }
+      
+      .upload-area {
+        padding: 40px 15px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .comparison-box {
+        height: 280px;
+      }
+      
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+      
+      .modal-content {
+        padding: 30px 20px;
+      }
+      
+      .features {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-magic"></i>
+      <span>AI Upscaler</span>
+    </div>
+    
+    <ul class="nav-links">
+      <li><a href="#" class="active">Home</a></li>
+      <li><a href="#">How It Works</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Examples</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+    
+    <div class="auth-buttons">
+      <button class="btn btn-outline" id="loginBtn">Login</button>
+      <button class="btn btn-primary" id="registerBtn">Register</button>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>AI-Powered Image Upscaler</h1>
+      <p>Enhance your images with cutting-edge AI technology. Upscale images up to 4x without losing quality. Perfect for photographers, designers, and content creators.</p>
+      <button class="btn btn-primary" id="startUpscaling">
+        <i class="fas fa-upload"></i> Start Upscaling Now
+      </button>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="upload-section">
+      <h2><i class="fas fa-cloud-upload-alt"></i> Upload Your Image</h2>
+      
+      <div class="upload-area" id="uploadArea">
+        <i class="fas fa-file-image"></i>
+        <h3>Drag & Drop Your Image</h3>
+        <p>Supports JPG, PNG, WEBP up to 10MB</p>
+        <label for="fileInput" class="upload-btn">Browse Files</label>
+        <input type="file" id="fileInput" class="file-input" accept=".jpg,.jpeg,.png,.webp">
+      </div>
+      
+      <div class="file-info" id="fileInfo">
+        <p><strong>Selected File:</strong> <span id="fileName">example.jpg</span></p>
+        <p><strong>Size:</strong> <span id="fileSize">2.4 MB</span></p>
+        <p><strong>Dimensions:</strong> <span id="fileDimensions">1280 x 720</span></p>
+      </div>
+      
+      <button class="btn btn-primary process-btn" id="processBtn">Upscale Image with AI</button>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="comparison-section">
+      <h2 class="section-title">Before & After Comparison</h2>
+      
+      <div class="comparison-box" id="comp">
+        <img src="ex.jpg" alt="Original Image" class="low-img">
+        <img src="ex2.jpg" alt="Upscaled Image" class="high-img" id="highImg">
+        <div class="slider-bar" id="bar"></div>
+      </div>
+      
+      <div class="hint">Drag the vertical line to compare the original image with the AI-upscaled version</div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+      <h2 class="section-title">Why Choose Our AI Upscaler</h2>
+      
+      <div class="features">
+        <div class="feature-card">
+          <i class="fas fa-rocket"></i>
+          <h3>Fast Processing</h3>
+          <p>Upscale images in seconds using our powerful AI algorithms running on high-performance servers.</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-chart-line"></i>
+          <h3>4x Resolution</h3>
+          <p>Increase image resolution up to 4 times while preserving quality and details.</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-brain"></i>
+          <h3>Smart AI</h3>
+          <p>Our AI intelligently analyzes images to enhance details, reduce noise, and improve clarity.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">AI Upscaler</div>
+        <p class="footer-description">A university project showcasing AI-powered image enhancement using the FreePic Image Enhancer API.</p>
+      </div>
+      
+      <div class="footer-col">
+        <div class="footer-links">
+          <h3>Quick Links</h3>
+          <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="#">How It Works</a></li>
+            <li><a href="#">API Documentation</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-col">
+        <div class="footer-links">
+          <h3>Contact</h3>
+          <ul>
+            <li><i class="fas fa-envelope"></i> contact@aiupscaler.edu</li>
+            <li><i class="fas fa-university"></i> University Computer Science Department</li>
+            <li><i class="fas fa-map-marker-alt"></i> 123 University Ave, Tech City</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <div class="copyright">
+      &copy; 2023 AI Image Upscaler - University Project. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- Login Modal -->
+  <div class="modal" id="loginModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeLogin">&times;</button>
+      <h2>Login to Your Account</h2>
+      <p>Access your upscaled images and history</p>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" class="form-control" 
+          holder="you@example.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary form-submit">Login</button>
+        
+        <div class="form-footer">
+          Don't have an account? <a href="#" id="switchToRegister">Register here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div class="modal" id="registerModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeRegister">&times;</button>
+      <h2>Create an Account</h2>
+      <p>Join to save and manage your upscaled images</p>
+      
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="registerName">Full Name</label>
+          <input type="text" id="registerName" class="form-control" placeholder="John Doe" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="registerEmail">Email Address</label>
+          <input type="email" id="registerEmail" class="form-control" placeholder="you@example.com" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="registerPassword">Password</label>
+          <input type="password" id="registerPassword" class="form-control" placeholder="Create a strong password" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="registerConfirmPassword">Confirm Password</label>
+          <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Confirm your password" required>
+        </div>
+        
+        <button type="submit" class="btn btn-primary form-submit">Create Account</button>
+        
+        <div class="form-footer">
+          Already have an account? <a href="#" id="switchToLogin">Login here</a>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="index.js"></script>
+
+
+</body>
+</html>
+
+
+
